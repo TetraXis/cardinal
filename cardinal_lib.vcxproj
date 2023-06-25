@@ -152,6 +152,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="cardinal.h" />
+    <ClInclude Include="cardinal_scalable.h" />
     <ClInclude Include="pch.h" />
   </ItemGroup>
   <ItemGroup>

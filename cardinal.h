@@ -1,6 +1,7 @@
 #ifndef CARDINAL_NUMBER
 
 #include <string>
+#include <iostream>
 
 /*
 
@@ -225,7 +226,7 @@ struct cardinal
 	{
 		if (value[0] == '0' && value[1] == 'b') /* binary literal */
 		{
-			for (unsigned long long i = value.size() - 1, j = BIT_SIZE - 1; i > 1; --i)
+			for (unsigned int i = value.size() - 1, j = BIT_SIZE - 1; i > 1; --i)
 			{
 				if (value[i] != '0' && value[i] != '1')
 				{
@@ -457,6 +458,62 @@ struct cardinal
 		return result;
 	}
 
+	/* overflow on mutiplication */
+	cardinal	binary_search_division(cardinal other) const
+	{
+		cardinal self = *this;
+		bool self_flip = false, other_flip = false;
+		if (bits[SIGN])
+		{
+			self.invert();
+			self_flip = true;
+		}
+		if (other.bits[SIGN])
+		{
+			other.invert();
+			other_flip = true;
+		}
+		cardinal left = 0, right = { unsigned long long(-1),unsigned long long(-1),unsigned long long(-1),unsigned long long(-1) }, middle, temp;
+		right.bits.set_at(0, 0);
+		while (left != right)
+		{
+			middle = (left + right) >> 1;
+			std::cout << "Left:   " << left.to_binary(true) << '\n';
+			std::cout << "Middle: " << middle.to_binary(true) << '\n';
+			std::cout << "Right:  " << right.to_binary(true) << "\n";
+			temp = middle * other; // <-- overflow
+			std::cout << "Temp:   " << temp.to_binary(true) << "\n";
+			if (temp > self)
+			{
+				right = middle;
+				std::cout << "right = middle\n";
+			}
+			else
+			{
+				if (temp == self)
+				{
+					return middle;
+				}
+				else
+				{
+					left = middle;
+					std::cout << "left = middle\n";
+				}
+			}
+		}
+		if (right * other <= self)
+		{
+			return right;
+		}
+		right.decrement();
+		return right;
+	}
+
+	/* bad */
+	cardinal	operator	%	(cardinal other) const
+	{
+		return as_integer() - (as_integer() / other.as_integer()).as_integer() * other.as_integer();
+	}
 
 
 	cardinal	operator	++	(int) noexcept
@@ -751,14 +808,19 @@ struct cardinal
 
 	operator double() const
 	{
+		cardinal self = *this;
 		unsigned long long double_bits = 0;
 		long long exponent = -1, first_one = -1;
+		if (bits[SIGN])
+		{
+			self.invert();
+		}
 		for (int i = 0; i < BIT_SIZE; i++)
 		{
-			if (bits[i])
+			if (self.bits[i])
 			{
 				first_one = i;
-				exponent = 958ll + BIT_SIZE - i; // exonent - 1 - 64(fractional size) + 1023(exponent shift)
+				exponent = 958ll + BIT_SIZE - i; // exonent = 1 - 64(fractional size) + 1023(exponent shift)
 				break;
 			}
 		}
@@ -767,10 +829,10 @@ struct cardinal
 			return 0.0;
 		}
 		++first_one; // skip unnecessery one;
-		for (int i = first_one, j = 0; i < BIT_SIZE && j < 52; i++, j++)
+		for (long long i = first_one, j = 0; i < BIT_SIZE && j < 52; i++, j++)
 		{
 			double_bits <<= 1;
-			double_bits += bits[i];
+			double_bits += self.bits[i];
 		}
 		if (BIT_SIZE - first_one - 52 - 64 > 0)
 		{
@@ -783,7 +845,7 @@ struct cardinal
 		}
 		return *(double*)&double_bits;
 	}
-
+	/*
 	operator std::string() const noexcept
 	{
 		std::string result = (bits[SIGN] ? "1 " : "0 ");
@@ -797,6 +859,31 @@ struct cardinal
 		{
 			result += bits[i] + '0';
 		}
+		return result;
+	}
+	*/
+
+	/* bad */
+	operator std::string() const noexcept
+	{
+		cardinal temp = *this;
+		cardinal temp_int = bits[SIGN] ? -*this : *this;
+		temp_int.bits.fractional = 0;
+		std::string result = "";
+		while (temp_int > cardinal(0))
+		{
+			result += '0' + int(temp_int % cardinal(10));
+			temp_int = (temp_int / cardinal(10)).as_integer();
+		}
+		if (bits[SIGN])
+		{
+			result += '-';
+		}
+		for (unsigned int i = 0; i < result.size() / 2; i++)
+		{
+			std::swap(result[i], result[result.size() - 1 - i]);
+		}
+		result += ".***";
 		return result;
 	}
 
@@ -843,8 +930,8 @@ struct cardinal
 		}
 		else
 		{
-			*this += {0, 0, 0, 1};
 			bits.flip();
+			*this += {0, 0, 0, 1};
 		}
 	}
 
@@ -855,7 +942,10 @@ struct cardinal
 		return result;
 	}
 
-
+	const cardinal as_integer() const
+	{
+		return { bits.left, bits.middle, bits.right, 0 };
+	}
 
 	const bool get_bit(const unsigned int& position) const
 	{

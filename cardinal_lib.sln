@@ -7,6 +7,8 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "cardinal_lib", "cardinal_li
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "cardinal_lib_unit_test", "..\cardinal_lib_unit_test\cardinal_lib_unit_test.vcxproj", "{847485C6-3CA1-43E2-BC35-7CA4D6310503}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "VityaBigNumbers", "..\VityaBigNumbers\VityaBigNumbers.vcxproj", "{153E2744-3B0E-4B1E-A9FC-8FF05019478B}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|x64 = Debug|x64
@@ -31,6 +33,14 @@ Global
 		{847485C6-3CA1-43E2-BC35-7CA4D6310503}.Release|x64.Build.0 = Release|x64
 		{847485C6-3CA1-43E2-BC35-7CA4D6310503}.Release|x86.ActiveCfg = Release|Win32
 		{847485C6-3CA1-43E2-BC35-7CA4D6310503}.Release|x86.Build.0 = Release|Win32
+		{153E2744-3B0E-4B1E-A9FC-8FF05019478B}.Debug|x64.ActiveCfg = Debug|x64
+		{153E2744-3B0E-4B1E-A9FC-8FF05019478B}.Debug|x64.Build.0 = Debug|x64
+		{153E2744-3B0E-4B1E-A9FC-8FF05019478B}.Debug|x86.ActiveCfg = Debug|Win32
+		{153E2744-3B0E-4B1E-A9FC-8FF05019478B}.Debug|x86.Build.0 = Debug|Win32
+		{153E2744-3B0E-4B1E-A9FC-8FF05019478B}.Release|x64.ActiveCfg = Release|x64
+		{153E2744-3B0E-4B1E-A9FC-8FF05019478B}.Release|x64.Build.0 = Release|x64
+		{153E2744-3B0E-4B1E-A9FC-8FF05019478B}.Release|x86.ActiveCfg = Release|Win32
+		{153E2744-3B0E-4B1E-A9FC-8FF05019478B}.Release|x86.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
