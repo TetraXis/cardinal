@@ -4,30 +4,8 @@
 namespace experimental
 {
 
-
-	/*
-
-			cardinal structure:
-
-			256 bits
-			1 bit - sign
-			next 191 bits - integer part
-			next 64 bits - fractional part
-
-			bits represented using 4 unsigned long longs:
-			left, middle, right, fractional
-
-	*/
-
-#define BIT_SIZE			256
 #define PART_BIT_SIZE		64
 #define SIGN				0
-#define INTEGER_LEFT		1
-#define INTEGER_RIGHT		191
-#define INTEGER_SIZE		191
-#define FRACTIONAL_LEFT		192
-#define FRACTIONAL_RIGHT	255
-#define FRACTIONAL_SIZE		64
 #define ULL_MAX_VALUE		18446744073709551615
 
 	/*template <typename T>
@@ -70,7 +48,7 @@ namespace experimental
 		return result;
 	}*/
 
-	template<unsigned int n, unsigned int f>
+	template<unsigned int n = 3, unsigned int f = 1>
 	struct cardinal
 	{
 		struct bit_structure
@@ -84,10 +62,6 @@ namespace experimental
 					parts[i] = 0;
 				}
 			}
-
-			/*bit_structure(const unsigned long long& left, const unsigned long long& middle, const unsigned long long& right, const unsigned long long& fractional)
-				: left(left), middle(middle), right(right), fractional(fractional)
-			{}*/
 
 			const bool operator [](unsigned int position) const noexcept
 			{
@@ -334,7 +308,7 @@ namespace experimental
 			{
 				result.invert();
 			}
-			cout << result.to_binary() << " big\n";
+			// cout << result.to_binary() << " big\n";
 			return result;
 		}
 
@@ -465,6 +439,18 @@ namespace experimental
 			}
 		}
 
+		bool		operator	==	(const cardinal<n, f>& other) const
+		{
+			for (int i = 0; i < n + f; i++)
+			{
+				if (bits[i] != other.bits[i])
+				{
+					return false;
+				}
+			}
+			return true;
+		}
+
 
 		std::string to_binary(const bool& add_spaces = false) const noexcept
 		{
@@ -521,7 +507,7 @@ namespace experimental
 			one.bits.parts[n + f - 1] = 1;
 			if (bits.parts[SIGN])
 			{
-				*this = *this - one;
+				*this = *this + one.inverted();
 				bits.flip();
 			}
 			else
@@ -567,9 +553,9 @@ namespace experimental
 		}
 	};
 
-	/*std::wstring ToString(const cardinal& q)
+	std::wstring ToString(const cardinal<>& q)
 	{
 		return as_wide_binary(q);
-	}*/
+	}
 
 }
