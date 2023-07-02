@@ -46,49 +46,62 @@ std::wstring as_wide_binary(T value)
 	return result;
 }
 
-template<unsigned int n = 3, unsigned int f = 1>
+template<const unsigned int n = 3, const unsigned int f = 1>
 struct cardinal
 {
 	struct bit_structure
 	{
-		unsigned long long parts[n + f];
+		unsigned long long parts[n + f]{};
 
 		bit_structure();
-		bool operator [](unsigned int position) const noexcept;
-		void set_at(const unsigned int& position, const bool& value) noexcept;
-		void flip() noexcept;
+
+		bool operator []	(unsigned int position) const noexcept;
+		void set_at			(const unsigned int& position, const bool& value) noexcept;
+		void flip			() noexcept;
 	} bits;
 
 	cardinal() {}
 	cardinal(cardinal const&) = default;
 	cardinal(cardinal<n / 2, f> other);
 	cardinal(cardinal<n * 2, f> other);
-	cardinal(const bool& value);
-	cardinal(int value) noexcept;
-	cardinal(const unsigned int& value) noexcept;
-	cardinal(const long long& value) noexcept;
-	cardinal(const unsigned long long& value) noexcept;
-	cardinal(const std::string& value) noexcept;
+	cardinal(bool value);
+	cardinal(int value)					noexcept;
+	cardinal(unsigned int value)		noexcept;
+	cardinal(long long value)			noexcept;
+	cardinal(unsigned long long value)	noexcept;
+	cardinal(float value)	noexcept;
+	cardinal(double value)	noexcept;
+	cardinal(const std::string& value)	noexcept;
 
-	cardinal<n, f>	operator	-	() const noexcept;
-	cardinal<n, f>	operator	+	(const cardinal<n, f>& other) const noexcept;
+	cardinal<n, f>	operator	-	()								const noexcept;
+
+	cardinal<n, f>	operator	+	(const cardinal<n, f>& other)	const noexcept;
+	cardinal<n, f>	operator	-	(const cardinal<n, f>& other)	const noexcept;
+	cardinal<n, f>	operator	*	(cardinal<n, f> other)			const;
+	cardinal<n, f>	operator	/	(const cardinal<n, f>& other)	const;
+
 	void			operator	+=	(const cardinal<n, f>& other);
-	cardinal<n, f>	operator	-	(const cardinal<n, f>& other) const noexcept;
-	cardinal<n, f>	operator	*	(cardinal<n, f> other) const;
-	cardinal<n, f>	operator	<<	(int shift) const noexcept;
-	cardinal<n, f>	operator	>>	(int shift) const noexcept;
+	void			operator	-=	(const cardinal<n, f>& other);
 
-	void			operator	<<=	(int shift) noexcept;
-	void			operator	>>=	(int shift) noexcept;
+	cardinal<n, f>	operator	<<	(int shift)						const noexcept;
+	cardinal<n, f>	operator	>>	(int shift)						const noexcept;
+	void			operator	<<=	(int shift)						noexcept;
+	void			operator	>>=	(int shift)						noexcept;
 
-	bool			operator	==	(const cardinal<n, f>& other) const;
+	bool			operator	==	(const cardinal<n, f>& other)	const;
+	bool			operator	!=	(const cardinal<n, f>& other)	const;
+	bool			operator	>	(const cardinal<n, f>& other)	const;
+	bool			operator	>=	(const cardinal<n, f>& other)	const;
+	bool			operator	<	(const cardinal<n, f>& other)	const;
+	bool			operator	<=	(const cardinal<n, f>& other)	const;
 
-	std::string		to_binary(const bool& add_spaces = false) const noexcept;
-	void			invert();
-	cardinal<n, f>	inverted() const;
-	const bool		get_bit(unsigned int position) const;
-	void			set_bit(unsigned int position, bool value = false);
-	void			set_to_max(bool sign = false);
+	void			invert			();
+	cardinal<n, f>	inverted		()								const;
+	const bool		get_bit			(unsigned int position)			const;
+	void			set_bit			(unsigned int position, bool value);
+	void			set_to_max		(bool sign = false);
+
+	std::string		to_binary		(bool add_spaces = false)		const noexcept;
 };
 
 template<unsigned int n, unsigned int f>
