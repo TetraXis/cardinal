@@ -256,7 +256,6 @@ cardinal<n, f> cardinal<n, f>::operator * (cardinal<n, f> other) const
 	{
 		result.invert();
 	}
-	// cout << result.to_binary() << " big\n";
 	return result;
 }
 
@@ -279,6 +278,7 @@ cardinal<n, f> cardinal<n, f>::operator / (const cardinal<n, f>& other) const
 			left = result;
 		}
 		result = (left + right) >> 1;
+		temp = result * other;
 	}
 
 	return result;
