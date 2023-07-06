@@ -9,6 +9,5 @@
 
 // add headers that you want to pre-compile here
 #include "cardinal.h"
-#include "cardinal_scalable.h"
 
 #endif //PCH_H
