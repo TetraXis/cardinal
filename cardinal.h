@@ -16,8 +16,8 @@ struct cardinal
 		bit_structure();
 
 		bool operator []	(unsigned int position) const;
-		void set_at(const unsigned int& position, const bool& value);
-		void flip();
+		void set_at			(const unsigned int& position, const bool& value);
+		void flip			();
 	} bits;
 
 	cardinal();
@@ -33,20 +33,27 @@ struct cardinal
 	cardinal(double value);
 	cardinal(const std::string& value);
 
+	static cardinal<n, f> middle_of(const cardinal<n, f>& a, const cardinal<n, f>& b); // wrong
+
+
 	cardinal<n, f>	operator	-	()								const;
+	cardinal<n, f>	operator	~	()								const;
+
+	cardinal<n, f>&	operator	++	();		// prefix
+	cardinal<n, f>	operator	++	(int);	// postfix
+	cardinal<n, f>&	operator	--	();		// prefix
+	cardinal<n, f>	operator	--	(int);	// postfix
 
 	cardinal<n, f>	operator	+	(const cardinal<n, f>& other)	const;
 	cardinal<n, f>	operator	-	(const cardinal<n, f>& other)	const;
 	cardinal<n, f>	operator	*	(cardinal<n, f> other)			const;
-	cardinal<n, f>	operator	/	(cardinal<n, f> other)	const;
-
+	cardinal<n, f>	operator	/	(cardinal<n, f> other)			const;
+	cardinal<n, f>	operator	%	(cardinal<n, f> other)			const;
 	void			operator	+=	(const cardinal<n, f>& other);
 	void			operator	-=	(const cardinal<n, f>& other);
-
-	cardinal<n, f>	operator	<<	(int shift)						const;
-	cardinal<n, f>	operator	>>	(int shift)						const;
-	void			operator	<<=	(int shift);
-	void			operator	>>=	(int shift);
+	void			operator	*=	(const cardinal<n, f>& other);
+	void			operator	/=	(const cardinal<n, f>& other);
+	void			operator	%=	(const cardinal<n, f>& other);
 
 	bool			operator	==	(const cardinal<n, f>& other)	const;
 	bool			operator	!=	(const cardinal<n, f>& other)	const;
@@ -55,20 +62,33 @@ struct cardinal
 	bool			operator	<	(const cardinal<n, f>& other)	const;
 	bool			operator	<=	(const cardinal<n, f>& other)	const;
 
-	static cardinal<n, f> middle_of(const cardinal<n, f>& a, const cardinal<n, f>& b); // wrong
+	cardinal<n, f>	operator	<<	(int shift)						const;
+	cardinal<n, f>	operator	>>	(int shift)						const;
+	void			operator	<<=	(int shift);
+	void			operator	>>=	(int shift);
+
+	cardinal<n, f>	operator	&	(const cardinal<n, f>& other)	const;
+	cardinal<n, f>	operator	|	(const cardinal<n, f>& other)	const;
+	cardinal<n, f>	operator	^	(const cardinal<n, f>& other)	const;
+	void			operator	&=	(const cardinal<n, f>& other);
+	void			operator	|=	(const cardinal<n, f>& other);
+	void			operator	^=	(const cardinal<n, f>& other);
+
 
 	void			invert();
-	cardinal<n, f>	inverted()								const;
+	cardinal<n, f>	inverted()			const;
 	void			add_smallest();
 	void			sub_smallest();
-	cardinal<n, f>	added_smallest()						const;
-	cardinal<n, f>	subed_smallest()						const;
-
-	const bool		get_bit(unsigned int position)			const;
-	void			set_bit(unsigned int position, bool value);
+	cardinal<n, f>	added_smallest()	const;
+	cardinal<n, f>	subed_smallest()	const;
 	void			set_to_max(bool sign = false);
 
-	std::string		to_binary(bool add_spaces = false)		const;
+	const bool		get_bit(unsigned int position)	const;
+	void			set_bit(unsigned int position, bool value);
+
+
+	std::string		to_binary(bool add_spaces = false)	const;
+	std::string		to_string()	const;
 };
 
 template <typename T>
@@ -320,6 +340,41 @@ cardinal<n, f> cardinal<n, f>::operator - () const
 	return inverted();
 }
 
+template<unsigned int n, unsigned int f>
+cardinal<n, f> cardinal<n, f>::operator~() const
+{
+	// UNDONE: ~
+	return cardinal<n, f>();
+}
+
+template<unsigned int n, unsigned int f>
+cardinal<n, f>& cardinal<n, f>::operator++()
+{
+	// UNDONE: ++
+	return this;
+}
+
+template<unsigned int n, unsigned int f>
+cardinal<n, f> cardinal<n, f>::operator++(int)
+{
+	// UNDONE: ++(int)
+	return cardinal<n, f>();
+}
+
+template<unsigned int n, unsigned int f>
+cardinal<n, f>& cardinal<n, f>::operator--()
+{
+	// UNDONE: --
+	return this;
+}
+
+template<unsigned int n, unsigned int f>
+cardinal<n, f> cardinal<n, f>::operator--(int)
+{
+	// UNDONE: --(int)
+	return cardinal<n, f>();
+}
+
 template<const unsigned int n, const unsigned int f>
 cardinal<n, f> cardinal<n, f>::operator + (const cardinal<n, f>&other) const
 {
@@ -361,35 +416,51 @@ void cardinal<n, f>::operator -= (const cardinal<n, f>&other)
 	*this += other.inverted();
 }
 
+template<unsigned int n, unsigned int f>
+void cardinal<n, f>::operator*=(const cardinal<n, f>& other)
+{
+	// UNDONE: *=
+}
+
+template<unsigned int n, unsigned int f>
+void cardinal<n, f>::operator/=(const cardinal<n, f>& other)
+{
+	// UNDONE: /=
+}
+
+template<unsigned int n, unsigned int f>
+void cardinal<n, f>::operator%=(const cardinal<n, f>& other)
+{
+	// UNDONE: %=
+}
+
 template<const unsigned int n, const unsigned int f>
 cardinal<n, f> cardinal<n, f>::operator * (cardinal<n, f> other) const
 {
-	// TODO: Fix multiplication overflow problems
-	// Might reapproach overflow
-	cardinal<n << 1, f> result;
+	cardinal<n, f> result;
 	int shift;
-	bool flip_other = other.bits[SIGN];
-	if (flip_other)
+	bool flip = other.bits.parts[(n-1) >> 1] == ULL_MAX_VALUE;
+	if (flip)
 	{
 		other.invert();
 	}
 
-	for (int i = n + f - 1; i > 0; i--)
+	for (int i = n + f - 1; i >= 0; i--)
 	{
 		shift = (n - f - i) * PART_BIT_SIZE;
 		while (other.bits.parts[i] > 0)
 		{
 			if (other.bits.parts[i] & 1)
 			{
-				result += *this << shift; // cardinal<n << 1, f>(*this) ???
+				result += *this << shift;
 			}
 			shift++;
 			other.bits.parts[i] >>= 1;
 		}
 	}
-	if (flip_other)
+	if (flip)
 	{
-		result.invert();
+		return result.inverted();
 	}
 	return result;
 }
@@ -428,6 +499,13 @@ cardinal<n, f> cardinal<n, f>::operator / (cardinal<n, f> other) const
 		return result.inverted();
 	}
 	return result;
+}
+
+template<unsigned int n, unsigned int f>
+cardinal<n, f> cardinal<n, f>::operator%(cardinal<n, f> other) const
+{
+	// UNDONE: %
+	return cardinal<n, f>();
 }
 
 template<const unsigned int n, const unsigned int f>
@@ -488,6 +566,48 @@ void cardinal<n, f>::operator >>= (int shift)
 			bits.set_at(i, sign);
 		}
 	}
+}
+
+template<unsigned int n, unsigned int f>
+cardinal<n, f> cardinal<n, f>::operator&(const cardinal<n, f>& other) const
+{
+	// UNDONE: &
+	return cardinal<n, f>();
+}
+
+template<unsigned int n, unsigned int f>
+cardinal<n, f> cardinal<n, f>::operator|(const cardinal<n, f>& other) const
+{
+	// UNDONE: |
+	return cardinal<n, f>();
+}
+
+template<unsigned int n, unsigned int f>
+cardinal<n, f> cardinal<n, f>::operator^(const cardinal<n, f>& other) const
+{
+	// UNDONE: ^
+	return cardinal<n, f>();
+}
+
+template<unsigned int n, unsigned int f>
+void cardinal<n, f>::operator&=(const cardinal<n, f>& other)
+{
+	// UNDONE: &=
+	return cardinal<n, f>();
+}
+
+template<unsigned int n, unsigned int f>
+void cardinal<n, f>::operator|=(const cardinal<n, f>& other)
+{
+	// UNDONE: |=
+	return cardinal<n, f>();
+}
+
+template<unsigned int n, unsigned int f>
+void cardinal<n, f>::operator^=(const cardinal<n, f>& other)
+{
+	// UNDONE: ^=
+	return cardinal<n, f>();
 }
 
 template<const unsigned int n, const unsigned int f>
@@ -587,7 +707,7 @@ bool cardinal<n, f>::operator <= (const cardinal<n, f>&other) const
 template<unsigned int n, unsigned int f>
 cardinal<n, f> cardinal<n, f>::middle_of(const cardinal<n, f>& a, const cardinal<n, f>& b)
 {
-	// TODO: fix middle_of (see max, -max)
+	// TODO: Fix middle_of (see max, -max)
 	cardinal result(a);
 	bool overflow_p = false, overflow = false;
 
@@ -624,6 +744,13 @@ std::string cardinal<n, f>::to_binary(bool add_spaces) const
 		std::swap(result[i], result[result.size() - 1 - i]);
 	}
 	return result;
+}
+
+template<unsigned int n, unsigned int f>
+std::string cardinal<n, f>::to_string() const
+{
+	// UNDONE: to_string
+	return std::string();
 }
 
 template<const unsigned int n, const unsigned int f>
