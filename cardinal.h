@@ -15,9 +15,10 @@ struct cardinal
 
 		bit_structure();
 
-		bool operator []	(unsigned int position) const;
-		void set_at			(const unsigned int& position, const bool& value);
-		void flip			();
+		bool operator []		(unsigned int position) const;
+		void set_at				(const unsigned int& position, const bool& value);
+		unsigned int popcount	() const;
+		void flip				();
 	} bits;
 
 	cardinal();
@@ -175,6 +176,17 @@ void cardinal<n, f>::bit_structure::set_at(const unsigned int& position, const b
 	}
 	parts[position / PART_BIT_SIZE] &= ~(1ull << (63 - (position & 63)));
 	return;
+}
+
+template<unsigned int n, unsigned int f>
+unsigned int cardinal<n, f>::bit_structure::popcount() const
+{
+	unsigned int result = 0;
+	for (unsigned int i = 0; i < n + f; i++)
+	{
+		result += __popcnt64(parts[i]);
+	}
+	return result;
 }
 
 template<const unsigned int n, const unsigned int f>
@@ -439,7 +451,8 @@ cardinal<n, f> cardinal<n, f>::operator * (cardinal<n, f> other) const
 {
 	cardinal<n, f> result;
 	int shift;
-	bool flip = other.bits.parts[(n-1) >> 1] == ULL_MAX_VALUE;
+
+	bool flip = other.bits.popcount() > ((n + f) * PART_BIT_SIZE >> 1);
 	if (flip)
 	{
 		other.invert();
@@ -458,6 +471,7 @@ cardinal<n, f> cardinal<n, f>::operator * (cardinal<n, f> other) const
 			other.bits.parts[i] >>= 1;
 		}
 	}
+
 	if (flip)
 	{
 		return result.inverted();
@@ -492,7 +506,7 @@ cardinal<n, f> cardinal<n, f>::operator / (cardinal<n, f> other) const
 		}
 		result = middle_of(left, right);
 
-		temp = result * other; // <- think about overflow, try t avoid it
+		temp = result * other; // <- think about overflow, try to avoid it
 	}
 	if (flip)
 	{
@@ -705,11 +719,10 @@ bool cardinal<n, f>::operator <= (const cardinal<n, f>&other) const
 }
 
 template<unsigned int n, unsigned int f>
-cardinal<n, f> cardinal<n, f>::middle_of(const cardinal<n, f>& a, const cardinal<n, f>& b)
+inline cardinal<n, f> cardinal<n, f>::middle_of(const cardinal<n, f>& a, const cardinal<n, f>& b)
 {
-	// TODO: Fix middle_of (see max, -max)
-	cardinal result(a);
-	bool overflow_p = false, overflow = false;
+	//cardinal result(a);
+	/*bool overflow_p = false, overflow = false;
 
 	for (int i = n + f - 1; i >= 0; i--)
 	{
@@ -718,8 +731,8 @@ cardinal<n, f> cardinal<n, f>::middle_of(const cardinal<n, f>& a, const cardinal
 		overflow_p = overflow;
 	}
 	result >>= 1;
-	result.set_bit(0, overflow); // <- is incorrect
-	return result;
+	result.set_bit(0, overflow); // <- is incorrect*/
+	return a + ((b - a) >> 1);
 }
 
 template<const unsigned int n, const unsigned int f>
