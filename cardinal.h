@@ -34,7 +34,7 @@ struct cardinal
 	cardinal(double value);
 	cardinal(const std::string& value);
 
-	static cardinal<n, f> middle_of(const cardinal<n, f>& a, const cardinal<n, f>& b); // wrong
+	static cardinal<n, f> midpoint(const cardinal<n, f>& a, const cardinal<n, f>& b); // wrong
 
 
 	cardinal<n, f>	operator	-	()								const;
@@ -498,13 +498,13 @@ cardinal<n, f> cardinal<n, f>::operator / (cardinal<n, f> other) const
 	{
 		if (temp > *this)
 		{
-			right = result;
+			right = result; // <- inverse might needed
 		}
 		else
 		{
 			left = result;
 		}
-		result = middle_of(left, right);
+		result = midpoint(left, right);
 
 		temp = result * other; // <- think about overflow, try to avoid it
 	}
@@ -719,7 +719,7 @@ bool cardinal<n, f>::operator <= (const cardinal<n, f>&other) const
 }
 
 template<unsigned int n, unsigned int f>
-inline cardinal<n, f> cardinal<n, f>::middle_of(const cardinal<n, f>& a, const cardinal<n, f>& b)
+inline cardinal<n, f> cardinal<n, f>::midpoint(const cardinal<n, f>& a, const cardinal<n, f>& b)
 {
 	//cardinal result(a);
 	/*bool overflow_p = false, overflow = false;
