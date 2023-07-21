@@ -17,7 +17,7 @@ struct cardinal
 
 		bool operator []		(unsigned int position) const;
 		void set_at				(const unsigned int& position, const bool& value);
-		unsigned int popcount	() const;
+		unsigned long long popcount	() const;
 		void flip				();
 	} bits;
 
@@ -34,7 +34,8 @@ struct cardinal
 	cardinal(double value);
 	cardinal(const std::string& value);
 
-	static cardinal<n, f> midpoint(const cardinal<n, f>& a, const cardinal<n, f>& b); // wrong
+	static cardinal<n, f> midpoint(const cardinal<n, f>& a, const cardinal<n, f>& b);
+	static cardinal<n, f> mult_clamp(const cardinal<n, f>& a, const cardinal<n, f>& b);
 
 
 	cardinal<n, f>	operator	-	()								const;
@@ -179,9 +180,9 @@ void cardinal<n, f>::bit_structure::set_at(const unsigned int& position, const b
 }
 
 template<unsigned int n, unsigned int f>
-unsigned int cardinal<n, f>::bit_structure::popcount() const
+unsigned long long cardinal<n, f>::bit_structure::popcount() const
 {
-	unsigned int result = 0;
+	unsigned long long result = 0;
 	for (unsigned int i = 0; i < n + f; i++)
 	{
 		result += __popcnt64(parts[i]);
@@ -482,7 +483,6 @@ cardinal<n, f> cardinal<n, f>::operator * (cardinal<n, f> other) const
 template<const unsigned int n, const unsigned int f>
 cardinal<n, f> cardinal<n, f>::operator / (cardinal<n, f> other) const
 {
-	// TODO: Fix devision, multiple errors
 	bool flip = other.bits.parts[0] & (1ull << 63);
 	if (flip)
 	{
@@ -490,15 +490,15 @@ cardinal<n, f> cardinal<n, f>::operator / (cardinal<n, f> other) const
 	}
 
 	cardinal<n, f> result, left, right, temp;
-	left.set_to_max(true);
 	right.set_to_max();
-	temp = result * other;
+	left = right.inverted(); // cannot use set_max(true)
+	temp = mult_clamp(result, other);
 
 	while (temp != *this && left.added_smallest() != right)
 	{
 		if (temp > *this)
 		{
-			right = result; // <- inverse might needed
+			right = result;
 		}
 		else
 		{
@@ -506,11 +506,12 @@ cardinal<n, f> cardinal<n, f>::operator / (cardinal<n, f> other) const
 		}
 		result = midpoint(left, right);
 
-		temp = result * other; // <- think about overflow, try to avoid it
+		temp = mult_clamp(result, other);
 	}
+
 	if (flip)
 	{
-		return result.inverted();
+		result.invert();
 	}
 	return result;
 }
@@ -733,6 +734,12 @@ inline cardinal<n, f> cardinal<n, f>::midpoint(const cardinal<n, f>& a, const ca
 	result >>= 1;
 	result.set_bit(0, overflow); // <- is incorrect*/
 	return a + ((b - a) >> 1);
+}
+
+template<unsigned int n, unsigned int f>
+inline cardinal<n, f> cardinal<n, f>::mult_clamp(const cardinal<n, f>& a, const cardinal<n, f>& b)
+{
+	return cardinal< n << 1, f>(a) * cardinal< n << 1, f>(b);
 }
 
 template<const unsigned int n, const unsigned int f>
